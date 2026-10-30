@@ -34,6 +34,8 @@ Python code with each other.
 ## matplotlib projects (midpoint-rule, leapfrog, euler, rk4)
 - Package modules: `mathcore.py` (all maths and `FACTS`), `scenes.py` (drawing), `narration.py` (TTS,
   timeline, mix), `render.py` (parallel x264 encode, concat, mux).
+- `render.py` splits every scene into `CHUNK`-frame work units (a multiple of the 2 s GOP, so chunks join
+  by stream copy) and caps x264 at `THREADS` per worker, since the pool already fills every core.
 - `narration.py`, `render.py` and `tools_asr_check.py` are **byte-identical** across the four projects.
   `build.py` differs only in the package name, docstring title and output filename. Keep it that way:
   apply a change to all four copies, then check with `md5 */*_video/narration.py`.
