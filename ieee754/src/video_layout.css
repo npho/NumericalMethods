@@ -1,11 +1,11 @@
-/* Fonts: bundled in ../fonts so the render does not need network access.
+/* Fonts: bundled in the repo's fonts/ (../../fonts from src/ and build/) so the render does not need network access.
    STIXGeneral and DejaVu Sans Mono supply symbols the Latin subsets lack (superscripts, arrows, not-equal). */
-@font-face { font-family: 'STIX Two Text'; font-weight: 400; src: url('../fonts/stix-two-text-latin-400-normal.woff2') format('woff2'); }
-@font-face { font-family: 'STIX Two Text'; font-weight: 600; src: url('../fonts/stix-two-text-latin-600-normal.woff2') format('woff2'); }
-@font-face { font-family: 'JetBrains Mono'; font-weight: 500; src: url('../fonts/jetbrains-mono-latin-500-normal.woff2') format('woff2'); }
-@font-face { font-family: 'STIXGeneralLocal'; font-weight: 400; src: url('../fonts/STIXGeneral.ttf'); }
-@font-face { font-family: 'STIXGeneralLocal'; font-weight: 600; src: url('../fonts/STIXGeneralBol.ttf'); }
-@font-face { font-family: 'DejaVuMonoLocal'; font-weight: 400 500; src: url('../fonts/DejaVuSansMono.ttf'); }
+@font-face { font-family: 'STIX Two Text'; font-weight: 400; src: url('../../fonts/stix-two-text-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'STIX Two Text'; font-weight: 600; src: url('../../fonts/stix-two-text-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-weight: 500; src: url('../../fonts/jetbrains-mono-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'STIXGeneralLocal'; font-weight: 400; src: url('../../fonts/STIXGeneral.ttf'); }
+@font-face { font-family: 'STIXGeneralLocal'; font-weight: 600; src: url('../../fonts/STIXGeneralBol.ttf'); }
+@font-face { font-family: 'DejaVuMonoLocal'; font-weight: 400 500; src: url('../../fonts/DejaVuSansMono.ttf'); }
 :root { --serif: 'STIX Two Text', 'STIXGeneralLocal', Georgia, serif; --mono: 'JetBrains Mono', 'DejaVuMonoLocal', monospace; }
 
 /* Video frame: 1920x1080 CSS px. The renderer's device scale factor makes 4K (x2) from the same layout. */

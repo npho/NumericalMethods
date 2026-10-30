@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build the 'Euler Method' explainer video.
 
-    python build.py setup                 # download the Kokoro TTS model (~350 MB, once)
+    python build.py setup                 # download the Kokoro TTS model (~350 MB, once) into ../models
     python build.py all --res 4k          # tts -> timeline -> audio -> render -> final mp4
     python build.py still 4 12.5 --res 720p --out s4.png   # preview one frame (no audio needed)
 
@@ -12,6 +12,7 @@ import argparse, json, os, sys
 from euler_video import narration as N
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
+MODELS = os.path.join(ROOT, "..", "models")          # shared by every video in the repo
 os.chdir(ROOT)
 
 
@@ -37,11 +38,11 @@ def main():
 
     script = N.load_script("narration.json")
     if a.cmd == "setup":
-        N.setup_models("models"); return
+        N.setup_models(MODELS); return
     if a.cmd == "test":
         sys.exit(os.system(f"{sys.executable} -m pytest -q tests"))
     if a.cmd in ("tts", "all"):
-        N.synth_all(script, "build", "models", a.voice, a.speed, a.force_tts)
+        N.synth_all(script, "build", MODELS, a.voice, a.speed, a.force_tts)
     if a.cmd == "tts": return
     if a.cmd == "still":
         from euler_video import scenes, render

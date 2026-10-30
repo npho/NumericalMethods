@@ -6,7 +6,7 @@
     python build.py video           # one step: models | narration | render | video | verify
 
 Pipeline
-  models     download the Kokoro text-to-speech model once (about 350 MB) into ./models
+  models     download the Kokoro text-to-speech model once (about 350 MB) into ../models
   narration  speak each line of narration.json, trim, limit and match loudness -> build/narration/cNN.wav
   render     screenshot every slide and the title-intro frames from src/scenes.html with headless Chromium
   video      lay everything on a timeline, crossfade slides, mix audio, encode H.264 + AAC -> output/*.mp4
@@ -33,7 +33,7 @@ from html import escape
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-SRC, BUILD, MODELS, OUTPUT = ROOT / 'src', ROOT / 'build', ROOT / 'models', ROOT / 'output'
+SRC, BUILD, MODELS, OUTPUT = ROOT / 'src', ROOT / 'build', ROOT.parent / 'models', ROOT / 'output'
 NARR = BUILD / 'narration'
 MODEL_URL = 'https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/'
 MODEL_FILES = {'kokoro-v1.0.onnx': 300_000_000, 'voices-v1.0.bin': 20_000_000}  # name -> minimum plausible size (bytes)
@@ -120,7 +120,7 @@ def open_page(pw, title: str, scale: int):
         await document.fonts.load('500 20px "JetBrains Mono"'); await document.fonts.ready;
         return document.fonts.check('600 68px "STIX Two Text"') && document.fonts.check('500 20px "JetBrains Mono"'); }""")
     if not ok:
-        sys.exit('The bundled fonts in ./fonts failed to load.')
+        sys.exit('The bundled fonts in ../fonts failed to load.')
     return browser, page
 
 

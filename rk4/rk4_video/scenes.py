@@ -25,8 +25,8 @@ from .mathcore import FACTS as F
 # ------------------------------------------------------------------ look
 BG = '#12141a'; FG = '#ece9e1'; MUTED = '#8b909a'; SOFT = '#b9bdc6'
 BLUE = '#58C4DD'; YELLOW = '#FFD35A'; CORAL = '#FC6255'; GREEN = '#83C167'
-FONT = 'TeX Gyre Pagella'              # Palatino clone, bundled in ../fonts (GUST Font License)
-FONT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'fonts')
+FONT = 'TeX Gyre Pagella'              # Palatino clone, bundled in the repo's fonts/ (GUST Font License)
+FONT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'fonts')
 FPS = 30
 VIS_LEAD = 0.15                         # visuals appear this much before the voice
 
