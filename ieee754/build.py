@@ -29,6 +29,7 @@ import subprocess
 import sys
 import time
 import urllib.request
+from html import escape
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -92,6 +93,7 @@ def build_page(title: str) -> Path:
     css = re.search(r'<style>(.*?)</style>', html, re.S).group(1)
     js = re.search(r'<script>(.*)</script>', html, re.S).group(1)
     layout = (SRC / 'video_layout.css').read_text(encoding='utf-8')
+    title = escape(title)
     page = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><title>{title}</title>
 <style>{css}
 {layout}</style></head><body>
