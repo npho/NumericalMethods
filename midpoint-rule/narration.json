@@ -1,0 +1,95 @@
+{
+  "voice": "af_heart",
+  "speed": 0.97,
+  "lang": "en-us",
+  "defaults": {"lead": 0.8, "gap": 0.55, "tail": 2.5},
+  "scenes": [
+    {
+      "name": "title", "lead": 1.0, "tail": 2.0,
+      "lines": [
+        {"key": "title", "text": "Suppose you need the area under a curve, and calculus won't hand you a formula."},
+        {"key": "rects", "text": "This video is about one of the simplest, and most surprisingly effective, ways to estimate it: the midpoint rule."}
+      ]
+    },
+    {
+      "name": "problem",
+      "lines": [
+        {"key": "area", "text": "Here's a curve: e to the minus x squared. We want the area underneath it, from zero to two."},
+        {"key": "noanti", "text": "The catch is that this function has no elementary antiderivative, so the fundamental theorem of calculus can't give us a closed form."},
+        {"key": "samples", "text": "Or maybe we never had a formula at all, just a table of measured values."},
+        {"key": "strips", "text": "So we do the practical thing: cut the interval into n strips of equal width h. Here, that's four strips, each half a unit wide."},
+        {"key": "rect", "text": "Over each strip, we'll replace the curve with a single flat rectangle. The only real question is: how tall should it be?"}
+      ]
+    },
+    {
+      "name": "three ways",
+      "lines": [
+        {"key": "left", "text": "One option is the height of the curve at the left edge of each strip. That gives {L4:.3f}, which is too big by about a quarter."},
+        {"key": "right", "text": "Use the right edge instead, and we get {R4:.3f}: too small by nearly the same amount."},
+        {"key": "mid", "text": "But sample the middle of each strip, and we get {M4:.4f}. That's off by less than a thousandth."},
+        {"key": "foot1", "text": "Notice that the left and right errors have opposite signs. For a decreasing curve like this one, they bracket the true value."},
+        {"key": "foot2", "text": "The midpoint estimate is roughly {ratio10} times closer, using exactly the same four function evaluations."}
+      ]
+    },
+    {
+      "name": "recipe",
+      "tail": 2.0,
+      "lines": [
+        {"key": "h", "text": "Let's make that precise. With n strips between a and b, each strip has width h, equal to b minus a, over n."},
+        {"key": "mi", "text": "The midpoint of strip number i sits at a, plus i minus one half, times h."},
+        {"key": "Mn", "text": "The midpoint rule says: add up the function values at those midpoints, then multiply by h."},
+        {"key": "r1", "text": "For our four strips, the first midpoint is a quarter, where the height is about {fm1:.2f}."},
+        {"key": "r2", "text": "Next, three quarters, where the height is {fm2:.2f}."},
+        {"key": "r3", "text": "Then one and a quarter, height {fm3:.2f}."},
+        {"key": "r4", "text": "And one and three quarters, height {fm4:.2f}."},
+        {"key": "sum", "text": "The heights sum to {S:.4f}. Multiply by one half, and the estimate is {M4:.4f}."},
+        {"key": "foot", "text": "That's four function evaluations and a single multiplication. The true value is {exact:.4f}."}
+      ]
+    },
+    {
+      "name": "why accurate",
+      "lines": [
+        {"key": "zoom", "text": "So why is the midpoint so accurate? Zoom in on one strip. The rectangle is exactly as tall as the curve at the centre of the strip."},
+        {"key": "tilt", "text": "Here's the trick. Tilt the flat top of that rectangle until it lies along the tangent line at the midpoint."},
+        {"key": "equal", "text": "Look at what tilting does. We gain a wedge on the left, and lose a wedge on the right. They're mirror images, so the two areas are exactly equal."},
+        {"key": "same", "text": "So the rectangle and the trapezoid under the tangent line have precisely the same area. The midpoint rule is secretly using the tangent line."},
+        {"key": "sliver", "text": "Now compare that tangent line with the actual curve. All it misses is this sliver, and that sliver is the entire error."},
+        {"key": "formula", "text": "A little calculus on the sliver gives an error of about f double prime of m, times h cubed, over twenty-four."},
+        {"key": "check", "text": "For this strip, the formula predicts {pred_strip:.5f}, and the true sliver is {sliver:.5f}. Close, but not exact, because of higher-order terms."},
+        {"key": "bend", "text": "Here the curve bends upward, so it sits above its tangent and the rectangle comes up short. And for a straight line, f double prime is zero: no sliver, no error. The midpoint rule is exact for lines."}
+      ]
+    },
+    {
+      "name": "add up",
+      "lines": [
+        {"key": "apply", "text": "Now do the same on every strip. Yellow means the curve is above its tangent, so the rectangle is too short. Coral means the curve is below, so the rectangle is too tall."},
+        {"key": "bars", "text": "Here's the error in each strip. The first strip curves downward, so it overshoots. The others mostly curve upward, so they undershoot."},
+        {"key": "net", "text": "Add them up and the errors partly cancel. The net error is minus {net_abs:.5f}: a slight overshoot."},
+        {"key": "telescope", "text": "There's a neat reason this works. Summing f double prime over the strips is a Riemann sum for the integral of f double prime, which is just the change in the slope. The bends telescope into the slopes at the two ends."},
+        {"key": "predict", "text": "That predicts an error of minus {pred_net_abs:.5f}. The actual error is minus {net_abs:.5f}. And the agreement gets better as n grows."}
+      ]
+    },
+    {
+      "name": "convergence",
+      "lines": [
+        {"key": "setup", "text": "What happens as we use more strips? Let's plot the error against the number of strips, on logarithmic axes."},
+        {"key": "reveal", "text": "For the left rule and the right rule, the error falls along a line of slope minus one: double the strips, and the error halves."},
+        {"key": "mid", "text": "The midpoint and trapezoid rules do far better. Their lines have slope minus two: double the strips, and the error drops by a factor of four. We measure {ratio_d:.2f}."},
+        {"key": "half", "text": "And between those two, the midpoint rule wins: its error is half the trapezoid's, with the opposite sign."},
+        {"key": "cost", "text": "It's also slightly cheaper, needing n function evaluations instead of n plus one."}
+      ]
+    },
+    {
+      "name": "summary",
+      "tail": 3.0,
+      "lines": [
+        {"key": "row1", "text": "Here's where we've landed. Left and right endpoints are exact only for constants, and their error shrinks in proportion to h."},
+        {"key": "row2", "text": "The midpoint rule is exact for straight lines, and its error is about h squared over twenty-four, times the change in slope."},
+        {"key": "row3", "text": "The trapezoid rule is also exact for lines, but its error is twice as large, and has the opposite sign."},
+        {"key": "row4", "text": "Blend them two to one, and you get Simpson's rule: exact for cubics, with an error that shrinks like h to the fourth."},
+        {"key": "caveat", "text": "One caveat: all of this assumes the function is smooth. The midpoint rule never touches the endpoints, so it can handle an endpoint blow-up, but slowly. For one over the square root of x, from zero to one, a thousand strips only gets you to {M1000:.3f}, instead of two."},
+        {"key": "next", "text": "Next up: Simpson's rule."}
+      ]
+    }
+  ]
+}
