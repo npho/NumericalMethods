@@ -1,0 +1,103 @@
+{
+  "voice": "af_heart",
+  "speed": 0.97,
+  "lang": "en-us",
+  "defaults": {"lead": 0.8, "gap": 0.55, "tail": 2.5},
+  "scenes": [
+    {
+      "name": "title", "lead": 1.0, "tail": 2.0,
+      "lines": [
+        {"key": "hook", "text": "How does a computer solve a differential equation? Before any of the clever methods, there is one idea so simple you could do it with a ruler: follow the slope."},
+        {"key": "name", "text": "It's called Oiler's method, and almost everything else in numerical integration is a refinement of it."}
+      ]
+    },
+    {
+      "name": "slope field",
+      "lines": [
+        {"key": "setup", "text": "A differential equation doesn't tell you where you are. It tells you which way to go. Here, y prime equals y: at every point, the slope of the solution equals its height. Each little tick shows that slope."},
+        {"key": "start", "text": "We're also told where to begin: y of zero is one. So place a dot there, and look at the tick beside it. Slope one. That's all the information we have, so let's use it."},
+        {"key": "judge", "text": "For this equation we happen to know the exact answer, e to the t. We'll draw it only to judge our method. A real solver wouldn't have it."}
+      ]
+    },
+    {
+      "name": "one step",
+      "lines": [
+        {"key": "tangent", "text": "Follow the tangent line for a distance h. Take h equal to one: we walk from time zero to time one, rising one unit for each unit across, and land at height two."},
+        {"key": "formula", "text": "In general, the new height is the old height, plus h times the slope at the old point. That's the whole method."},
+        {"key": "miss", "text": "The true value at time one is e, {w_e}. We've missed by {w_one_err}. The picture shows why: the curve bends upward, and the tangent line doesn't."}
+      ]
+    },
+    {
+      "name": "worked example",
+      "lines": [
+        {"key": "setup", "text": "Let's be less reckless. Take h equal to one half, and four steps, to reach time two. Each row needs only the row before it."},
+        {"key": "table", "text": "At every point the slope equals the height, so each step just multiplies the height by one and a half. One, one and a half, two point two five, three point three seven five, and {w_tab_y4} at time two."},
+        {"key": "under", "text": "The exact answer is {w_tab_exact}. We're short by about {w_tab_pct} percent. And notice the direction: every tangent lies below a curve that bends upward, so the errors don't cancel. They pile up on one side."}
+      ]
+    },
+    {
+      "name": "smaller steps",
+      "lines": [
+        {"key": "multi", "text": "Now shrink the step, and aim at time one. With h equal to one, we get two. One half gives two point two five. One quarter, {w_hv_025}. One tenth, {w_hv_01}. The path hugs the curve more and more closely."},
+        {"key": "limit", "text": "For this equation we can say exactly what happens. Each step multiplies by one plus h, so n steps give one plus one over n, to the power n. With a thousand steps that's {w_lim}, and as n grows it closes in on e. That's one of the classic ways to define e."}
+      ]
+    },
+    {
+      "name": "order",
+      "lines": [
+        {"key": "setup", "text": "How fast does the error shrink? Let's plot the error at time one against the step size, on logarithmic axes."},
+        {"key": "slope", "text": "It falls along a straight line of slope one. Halve the step, and the error halves. For this problem, the error is about {w_err_over_h} times h."},
+        {"key": "logistic", "text": "That isn't special to this equation. Here is a different one, the logistic equation, which is nonlinear but has a known solution. Its slope is also one."},
+        {"key": "local", "text": "Where does the first power come from? A single step makes an error of about one half, y double prime, times h squared. With h equal to a tenth, that's about five thousandths, and the real one-step error matches. But crossing the interval takes one over h steps, so the errors add up to something proportional to h."},
+        {"key": "bill", "text": "That's a steep bill. To get the error below one thousandth, we need roughly {w_n_1e3} steps."}
+      ]
+    },
+    {
+      "name": "stability",
+      "lines": [
+        {"key": "setup", "text": "Accuracy isn't the only worry. Take a decaying equation: y prime equals minus five y. The true solution dies away smoothly."},
+        {"key": "small", "text": "With h equal to point one, Oiler multiplies by one half at each step, and decays nicely."},
+        {"key": "mid", "text": "With h equal to point three, the factor is minus one half. The sign flips every step, but it still shrinks."},
+        {"key": "big", "text": "With h equal to point five, the factor is minus one and a half. Each step overshoots further than the last, and the numerical answer blows up, even though the true solution is decaying."},
+        {"key": "limit", "text": "The factor is one minus lambda h, so the method is stable only when h is below two over lambda. Here, that's point four."}
+      ]
+    },
+    {
+      "name": "amplification",
+      "lines": [
+        {"key": "factor", "text": "Here is the same story as a graph. Plot the size of the factor against lambda h. Oiler's is the V shaped line: below one until lambda h reaches two, and growing after."},
+        {"key": "back", "text": "Backward Oiler flips the update: use the slope at the new point, instead of the old one. For this equation, that gives a factor of one over one plus lambda h. It stays below one for every step size."},
+        {"key": "cost", "text": "The catch: the new point appears on both sides of the equation, so every step means solving an equation. And it's still only first order. It buys stability, not accuracy."}
+      ]
+    },
+    {
+      "name": "spring",
+      "lines": [
+        {"key": "back", "text": "This ties back to the leapfrog video. Apply Oiler to the mass on a spring, with position and velocity as a pair."},
+        {"key": "spiral", "text": "It spirals outward. The energy is multiplied by exactly one plus h squared at every step: one point oh four, when h is point two. After one period, that's about {w_spr_E1p} times the starting energy."},
+        {"key": "why", "text": "It's the same one-sided error as before, now acting on a system that ought to conserve energy. Leapfrog avoids it by staggering positions and velocities."}
+      ]
+    },
+    {
+      "name": "work",
+      "lines": [
+        {"key": "idea", "text": "Is there a better use of our slope evaluations? Oiler uses one slope per step. What if each step measured the slope more cleverly?"},
+        {"key": "mid", "text": "The midpoint method takes a half step to see what the slope looks like in the middle, then takes the full step using that slope. It costs two evaluations per step, and it's second order. It's the midpoint rule again."},
+        {"key": "rk4", "text": "The classic Runga Kutta method, R K four, blends four slopes per step, and it's fourth order."},
+        {"key": "count", "text": "So let's compare fairly: error against the number of slope evaluations. To get below one millionth on this problem, Oiler needs about {w_ev_euler} evaluations. The midpoint method needs about {w_ev_midpoint}. R K four needs {w_ev_rk4}."},
+        {"key": "caveat", "text": "This is a smooth, well-behaved problem, which is the best case for high-order methods. On rough problems the gap shrinks, so treat these numbers as this problem's, not a law."}
+      ]
+    },
+    {
+      "name": "summary",
+      "tail": 3.0,
+      "lines": [
+        {"key": "row1", "text": "To sum up. Oiler's method uses one slope per step. It's first order, and stable only for small enough steps."},
+        {"key": "row2", "text": "Backward Oiler is also first order, but on this test it's stable for any step size, at the price of solving an equation every step."},
+        {"key": "row3", "text": "The midpoint method and R K four spend more slope evaluations per step, and win by a wide margin when the problem is smooth."},
+        {"key": "row4", "text": "Leapfrog, from the previous video, aims at something else: it's second order, and it keeps the energy of a spring bounded."},
+        {"key": "close", "text": "Oiler's method is rarely the best choice. But it's the one that makes the rest easy to understand. Every improvement is a better answer to the same question: which slope should I follow?"}
+      ]
+    }
+  ]
+}
