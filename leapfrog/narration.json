@@ -1,0 +1,131 @@
+{
+  "voice": "af_heart",
+  "speed": 0.97,
+  "lang": "en-us",
+  "defaults": {"lead": 0.8, "gap": 0.55, "tail": 2.5},
+  "scenes": [
+    {
+      "name": "title", "lead": 1.0, "tail": 2.0,
+      "lines": [
+        {"key": "hook", "text": "Suppose you want to simulate a planet going around its star, not for one orbit, but for a thousand. Which numerical method would you trust?"},
+        {"key": "name", "text": "The answer is a surprisingly humble one, a method physicists have used for decades. It's called leapfrog."}
+      ]
+    },
+    {
+      "name": "problem",
+      "lines": [
+        {"key": "setup", "text": "Let's start with the simplest physics we can: a mass on a spring. The acceleration is minus x. In phase space, with position across and velocity up, the true motion is a circle, because the energy never changes."},
+        {"key": "euler", "text": "Now step it forward the obvious way, with Oiler's method. Update the position using the current velocity, and the velocity using the current acceleration. Steps of size point two."},
+        {"key": "grow", "text": "It spirals outward. Every single step multiplies the energy by one plus delta t squared, here one point oh four. After one period the energy has grown by a factor of {w_eul_E1p}, and by time twelve, by a factor of {w_eul_E12}."},
+        {"key": "why", "text": "A spring that creates energy out of nothing isn't just a little inaccurate. It's the wrong kind of wrong, because its mistakes all push in the same direction."}
+      ]
+    },
+    {
+      "name": "the idea",
+      "lines": [
+        {"key": "stagger", "text": "Here's the trick. Don't store position and velocity at the same moments. Keep the positions at whole time steps, and the velocities halfway in between."},
+        {"key": "kick", "text": "To update a velocity, use the acceleration at the position sitting right in the middle of that step. The new velocity is the old one, plus the acceleration at x n, times delta t. Call that a kick."},
+        {"key": "drift", "text": "To update a position, use the velocity sitting right in the middle. The new position is the old one, plus the velocity at n plus a half, times delta t. Call that a drift."},
+        {"key": "leap", "text": "Position and velocity take turns, each one leaping over the other. Hence the name: leapfrog."},
+        {"key": "start", "text": "One small detail. The velocity we're given lives at time zero, not at a half, so we begin with a half-sized kick to get it onto the grid."}
+      ]
+    },
+    {
+      "name": "midpoint",
+      "lines": [
+        {"key": "callback", "text": "If you've seen the video on the midpoint rule, this should feel familiar."},
+        {"key": "rect", "text": "Position is the integral of velocity. Using the velocity from the middle of the step is exactly the midpoint rule. Here's a step of size one on minus sine t. The middle rectangle is off by only four percent, while the left and right ones are far off."},
+        {"key": "both", "text": "The velocity update is a midpoint rule too. It adds up the acceleration across a step, using the value from the middle of that step. So every update in leapfrog is a midpoint rule, which is where its accuracy comes from."}
+      ]
+    },
+    {
+      "name": "worked example",
+      "lines": [
+        {"key": "setup", "text": "Let's run it by hand, with a deliberately huge step: delta t of one half. We start at x equals one, with zero velocity."},
+        {"key": "half", "text": "The half kick, using an acceleration of minus one, gives a velocity of minus a quarter at the halfway point."},
+        {"key": "step", "text": "Now drift: the position moves to point eight seven five. Then kick, drift, kick, drift. Each row needs only the row before it."},
+        {"key": "table", "text": "Four steps later, at time two, we have x equal to minus point four three five five."},
+        {"key": "compare", "text": "The exact answer is cosine of two, minus point four one six one. We're off by about {w_tab_err}, with a step this big. The dots stay close to the curve."}
+      ]
+    },
+    {
+      "name": "accuracy",
+      "lines": [
+        {"key": "setup", "text": "How accurate is it? Let's cut the step in half again and again, and look at the error at time ten, on logarithmic axes."},
+        {"key": "euler", "text": "Oiler's error falls along a line of slope one. Cut the step in half, and the error is cut in half."},
+        {"key": "lf", "text": "Leapfrog has slope two. Halve the step and the error drops fourfold, just like the midpoint rule, as promised."},
+        {"key": "rk4", "text": "The classic fourth-order Runge Kutta method has slope four, so on a short run it is far more accurate. But it needs four force evaluations per step. Leapfrog needs one."},
+        {"key": "honest", "text": "So on this test, R K four wins. Keep that in mind. The story changes when we run for a very long time."}
+      ]
+    },
+    {
+      "name": "reversibility",
+      "lines": [
+        {"key": "setup", "text": "Newton's laws can be run backwards. Flip the sign of the velocity, and the system retraces its steps. Does the numerical method keep that property?"},
+        {"key": "euler", "text": "Take thirty Oiler steps, flip the velocity, and take thirty more. We don't come home. We end up {w_rev_euler} away from where we began."},
+        {"key": "lf", "text": "Do the same with leapfrog, and we land back on the starting point, to within the rounding error of the computer."},
+        {"key": "why", "text": "The reason is symmetry. A leapfrog step looks the same run forwards or backwards in time. That time reversibility is the first of two properties behind its good long-term behavior."}
+      ]
+    },
+    {
+      "name": "area",
+      "lines": [
+        {"key": "setup", "text": "The second property is about area. Take a small cloud of starting states in phase space, push every one of them forward, and watch the area of the cloud."},
+        {"key": "euler", "text": "With Oiler, the cloud balloons. At a step of point three, its area is multiplied by one point oh nine, every step."},
+        {"key": "lf", "text": "With leapfrog, the cloud shears and stretches, but its area stays exactly the same. The determinant of the step is exactly one."},
+        {"key": "symp", "text": "Methods with this property are called symplectic. For a single pair of position and velocity, it simply means area-preserving. Together with reversibility, it has a remarkable consequence."}
+      ]
+    },
+    {
+      "name": "shadow energy",
+      "lines": [
+        {"key": "setup", "text": "So what does leapfrog conserve? Not the energy, exactly. But look at this. Take a big step, delta t equal to point eight, and plot where the points land."},
+        {"key": "claim", "text": "They don't sit on the circle. They sit on a slightly squashed ellipse, and they stay on it, to within rounding error. That ellipse is a level curve of a nearby energy, where x squared gets multiplied by one minus delta t squared over four."},
+        {"key": "bound", "text": "The true energy therefore isn't constant. But for this orbit it never strays further than delta t squared over eight, no matter how long we run."},
+        {"key": "general", "text": "For the spring, the nearby energy is exact. For general forces it is only approximate, but backward error analysis shows it stays nearly conserved for an extremely long time, when the step is small enough."}
+      ]
+    },
+    {
+      "name": "kepler",
+      "lines": [
+        {"key": "setup", "text": "Now a real test: a planet on an elongated orbit, with eccentricity one half. We give three methods the same budget, about five hundred force evaluations per orbit."},
+        {"key": "euler", "text": "Oiler spirals outward. After just two orbits, the planet is already well beyond where it should be."},
+        {"key": "rk4", "text": "R K four, taking larger steps, is superb. Two orbits look perfect, and its energy error is the smallest of the three."},
+        {"key": "lf", "text": "Leapfrog also looks perfect, though its energy error is bigger. So two orbits can't tell us who wins."}
+      ]
+    },
+    {
+      "name": "long run",
+      "lines": [
+        {"key": "setup", "text": "So let's run for a thousand orbits, and track the largest energy error seen so far."},
+        {"key": "euler", "text": "Oiler's error explodes. By orbit thirty, it is already {w_eul_pct} percent of the total energy of the orbit."},
+        {"key": "rk4", "text": "R K four starts out much more accurate than leapfrog. But its error keeps growing, in proportion to the number of orbits."},
+        {"key": "lf", "text": "Leapfrog's error is larger at first, and then it simply stops growing. After a thousand orbits, it is still about {w_lf_e4} parts in ten thousand."},
+        {"key": "cross", "text": "The curves cross after about {w_cross} orbits. By a thousand, R K four is {w_rk_over_lf} times worse, and the gap keeps widening."},
+        {"key": "honest", "text": "To be fair, the crossover point depends on the setup. A smaller R K four step, or a higher-order method, pushes it later. What doesn't change is the shape: steady growth, versus a bound."}
+      ]
+    },
+    {
+      "name": "limits",
+      "tail": 3.0,
+      "lines": [
+        {"key": "coarse", "text": "Leapfrog isn't magic. Take a big step of point one, and the energy error stays bounded, but the orbit itself slowly rotates, by about {w_prec_01} degrees per orbit."},
+        {"key": "precess", "text": "That's a phase error. Halve the step, and it shrinks roughly fourfold, to {w_prec_005} degrees, just as second order predicts."},
+        {"key": "var", "text": "Second pitfall: adapting the step size. If we shrink the step near the planet in the naive way, reversibility is broken, and the energy starts to drift, about {w_var_e7} parts in ten million per orbit."},
+        {"key": "forces", "text": "Third: the force must depend only on position. Forces that depend on velocity, such as drag or a magnetic field, need modified versions of the method."},
+        {"key": "phase", "text": "And bounded energy does not mean correct position. The planet stays on a good orbit, but it can still arrive early or late."}
+      ]
+    },
+    {
+      "name": "summary",
+      "tail": 3.0,
+      "lines": [
+        {"key": "row1", "text": "Here's where we've landed. Oiler's method is first order, and it is neither reversible nor symplectic. Its energy drifts away."},
+        {"key": "row2", "text": "Leapfrog is second order, uses one force evaluation per step, and is both reversible and symplectic. Its energy error stays bounded."},
+        {"key": "row3", "text": "R K four is fourth order and more accurate per step, but it costs four evaluations, and its energy error grows, slowly."},
+        {"key": "row4", "text": "And you needn't stop at second order. Chain three leapfrog steps with weights {w_yosh_w1}, minus {w_yosh_w0}, and {w_yosh_w1}, and the middle step even runs backwards, and you get Yoshida's fourth-order method, which is still reversible and symplectic."},
+        {"key": "close", "text": "The lesson: when the physics conserves something, choose a method that respects the structure, rather than one that is merely accurate. Leapfrog costs hardly more than Oiler, and it remembers the geometry."}
+      ]
+    }
+  ]
+}
