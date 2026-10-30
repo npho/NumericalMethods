@@ -14,8 +14,8 @@ numbers, narration text, voice and timing are all generated from source. This is
 ## Quick start
 ```bash
 brew install ffmpeg              # Debian/Ubuntu: sudo apt install ffmpeg
-uv sync
-uv run build.py setup            # download Kokoro model files (~350 MB) into ./models
+uv sync                          # once, at the repo root or here (one shared environment)
+uv run build.py setup            # download Kokoro model files (~350 MB) into ../models
 uv run build.py test             # verify the maths
 uv run build.py all --res 4k     # tts -> timeline -> audio -> render -> build/midpoint_rule_4k.mp4
 ```
@@ -43,11 +43,11 @@ summary table, with Simpson's rule and the smoothness caveat.
 
 ## Layout
 ```
-build.py  narration.json  pyproject.toml  uv.lock  tools_asr_check.py
+build.py  narration.json  tools_asr_check.py
 midpoint_video/{mathcore,scenes,narration,render}.py
 tests/test_math.py
-fonts/                TeX Gyre Pagella (bundled, GUST Font License)
-models/ build/        generated (git-ignored; models/ is a symlink or a download)
+build/                generated (git-ignored)
+../fonts/ ../models/  shared with the other videos (TeX Gyre Pagella is bundled; models are downloaded)
 ```
 
 ## Caveats

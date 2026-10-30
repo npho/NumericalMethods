@@ -15,7 +15,7 @@ the narration. Unlike the matplotlib videos in this repo, slides are stills join
 ## Quick start
 ```bash
 brew install ffmpeg              # Debian/Ubuntu: sudo apt install ffmpeg
-uv sync
+uv sync                          # once, at the repo root or here (one shared environment)
 uv run playwright install chromium
 uv run build.py                  # models -> narration -> render -> video -> verify, 1080p
 uv run build.py --scale 2        # same at 4K -> output/ieee754_in_motion_3840x2160.mp4
@@ -25,7 +25,7 @@ after editing slides, run `render` then `video`. Behind a TLS-intercepting proxy
 
 | Step | Does | Output |
 |---|---|---|
-| `models` | downloads the Kokoro model and voices once (~350 MB) | `models/` |
+| `models` | downloads the Kokoro model and voices once (~350 MB) | `../models/` |
 | `narration` | checks captions, speaks each line, trims, limits, normalises loudness; caches unchanged lines | `build/narration/` |
 | `render` | screenshots every slide and the title-intro frames; `--scale 2` redraws at 3840×2160 | `build/frames_WxH/` |
 | `video` | builds the timeline, crossfades, mixes audio, encodes H.264 + AAC | `output/*.mp4` |
@@ -47,16 +47,16 @@ The 32 bits (sign, exponent, fraction) · decoding 6.25 field by field · gaps g
 * **Slides:** the `scenes` array in `src/scenes.html`. Each scene has an `svg()` function that reveals
   parts as the step counter `st` advances (`data-from`), and a `caps` list with one caption per step.
   Keep each `caption` in `narration.json` identical to its slide; the slide count is the sum of all `caps`.
-* **Voice:** list voices with `uv run python -c "from kokoro_onnx import Kokoro; print(sorted(Kokoro('models/kokoro-v1.0.onnx','models/voices-v1.0.bin').get_voices()))"`,
+* **Voice:** list voices with `uv run python -c "from kokoro_onnx import Kokoro; print(sorted(Kokoro('../models/kokoro-v1.0.onnx','../models/voices-v1.0.bin').get_voices()))"`,
   then `uv run build.py narration --voice am_michael` and `uv run build.py video`.
 * **Look:** CSS variables at the top of `src/scenes.html`; the video frame is `src/video_layout.css`.
 
 ## Layout
 ```
-build.py  narration.json  pyproject.toml  uv.lock
+build.py  narration.json
 src/scenes.html  src/video_layout.css
-fonts/                STIX Two Text, JetBrains Mono, STIXGeneral, DejaVu Sans Mono (bundled, see fonts/README.txt)
-models/ build/ output/    generated (git-ignored)
+build/ output/        generated (git-ignored)
+../fonts/ ../models/  shared with the other videos (STIX Two Text, JetBrains Mono, STIXGeneral, DejaVu Sans Mono)
 ```
 
 ## Caveats
@@ -65,4 +65,4 @@ models/ build/ output/    generated (git-ignored)
 * Slide contents appear all at once per step; only the crossfades and the title glide move.
 * TTS is intelligible but not a human voice. Listen to "NaN" (spoken "nan") and the long numbers.
 * 4K H.264 (level 5.1) plays on most modern devices; some older TVs and editors reject it.
-* Licences: fonts per `fonts/README.txt`; Kokoro-82M Apache-2.0, `kokoro-onnx` MIT. Verify before publishing.
+* Licences: fonts per `../fonts/README.txt`; Kokoro-82M Apache-2.0, `kokoro-onnx` MIT. Verify before publishing.

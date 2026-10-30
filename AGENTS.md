@@ -3,7 +3,8 @@
 Guidance for contributors and coding assistants working in this repository.
 
 ## Repository shape
-One folder per video; each is a self-contained uv project with no shared code between folders.
+One folder per video, plus shared assets and one uv environment at the root. Video folders share no
+Python code with each other.
 
 | Folder | Package | Output |
 |---|---|---|
@@ -13,12 +14,20 @@ One folder per video; each is a self-contained uv project with no shared code be
 | `rk4/` | `rk4_video/` | `build/rk4_<res>.mp4` |
 | `ieee754/` | none (`build.py` + `src/`) | `output/ieee754_in_motion_<W>x<H>.mp4` |
 
-## Every project has
+## Shared at the root
+- `pyproject.toml`, `uv.lock`, `.python-version` (3.13): one environment, the superset of every video's
+  dependencies. `[tool.uv] package = false`. `uv run` inside a video folder finds it by walking up.
+  Add a dependency here, with a comment naming the video that needs it.
+- `fonts/`: every bundled font with its licence (`fonts/README.txt`). Rendering never depends on system
+  fonts or network. matplotlib videos load `../../fonts` relative to their package; ieee754's CSS uses
+  `../../fonts` relative to `src/` and `build/`.
+- `models/`: the Kokoro model, downloaded once and used by every video (git-ignored; may be a symlink,
+  so the ignore pattern has no trailing slash). Each `build.py` defines it as `ROOT/../models`.
+- `.gitignore` for `.venv/`, `models` and Python caches; each video's `.gitignore` covers its own outputs.
+
+## Every video folder has
 - `build.py`: the only entry point. Run it as `uv run build.py <stage>`.
-- `pyproject.toml`, `uv.lock` and `.python-version` (3.13). `[tool.uv] package = false`.
 - `narration.json`: the script. Spoken text is the source of truth for timing.
-- `fonts/`: bundled fonts with their licence files. Rendering never depends on system fonts or network.
-- `.gitignore` ignoring `build/`, `models` (no trailing slash, so a symlink is ignored too), `.venv/` and caches.
 - `README.md` with the sections, in order: summary bullets, Quick start, What is in the video, Editing,
   Layout, Caveats.
 
@@ -28,11 +37,13 @@ One folder per video; each is a self-contained uv project with no shared code be
 - `narration.py`, `render.py` and `tools_asr_check.py` are **byte-identical** across the four projects.
   `build.py` differs only in the package name, docstring title and output filename. Keep it that way:
   apply a change to all four copies, then check with `md5 */*_video/narration.py`.
-- The `configure()` font block in `scenes.py` is also identical across projects. It registers
-  `fonts/*.otf` with `font_manager.fontManager.addfont` before checking for `TeX Gyre Pagella`.
+- The `configure()` font block in `scenes.py` is also identical across projects. It registers the
+  root `fonts/*.otf` with `font_manager.fontManager.addfont` before checking for `TeX Gyre Pagella`.
 - Every number on screen or in narration must come from `mathcore.py` (`{placeholder}` in
   `narration.json`), and each claim needs a test in `tests/test_math.py`. Run `uv run build.py test`
-  (or `uv run pytest`); `pythonpath = ["."]` in `pyproject.toml` lets tests import the package.
+  in a video folder, or `uv run pytest` at the root for all four. The root pytest config lists each
+  folder in `pythonpath` and uses `--import-mode=importlib` because every test file is `test_math.py`.
+  Tests must locate files from `__file__` (a `ROOT` constant), never from the working directory.
 - Scenes are pure functions of local time. Time events with `Q(scene, key, frac, off)`, never fixed seconds.
 - Rendering uses `multiprocessing.Pool` with an initializer. macOS uses the `spawn` start method, so
   worker state must be set in `render._init`, not inherited from the parent.
@@ -47,7 +58,7 @@ One folder per video; each is a self-contained uv project with no shared code be
 
 ## Platform
 - Development target is macOS (arm64) and Linux. System requirement is only `ffmpeg` with libx264.
-- Do not add apt-only or Linux-path assumptions. Prefer bundling assets into the project folder.
+- Do not add apt-only or Linux-path assumptions. Put bundled assets in the shared root folders.
 - Large generated files (`models/`, `build/`, `output/`, `*.mp4`, `*.wav`) are never committed.
 
 ## Verification

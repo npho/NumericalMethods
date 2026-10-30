@@ -13,14 +13,14 @@ numbers, narration (local Kokoro TTS) and timing.
 
 ## Requirements
 [uv](https://docs.astral.sh/uv/) and `ffmpeg` with libx264 (`brew install ffmpeg` or `apt install ffmpeg`).
-Fonts are bundled; models (~350 MB) download on first setup.
 
 ## Usage
-Each folder is a self-contained uv project:
+One uv environment at the repo root serves every video. Fonts are bundled in `fonts/`; the voice model
+(~350 MB) downloads once into `models/` and is shared.
 ```bash
-cd rk4
-uv sync
-uv run build.py setup     # ieee754: `uv run playwright install chromium`, then `uv run build.py`
-uv run build.py all --res 720p
+uv sync                          # install everything
+uv run pytest                    # maths tests for all videos
+cd rk4 && uv run build.py setup && uv run build.py all --res 720p
 ```
+For `ieee754`, run `uv run playwright install chromium` once, then `uv run build.py`.
 See each project's README for stages, options and editing notes.
