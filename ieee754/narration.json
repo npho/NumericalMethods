@@ -1,0 +1,105 @@
+{
+  "title": "IEEE 754 in Motion",
+  "lines": [
+    {
+      "caption": "A 32-bit float is just 32 bits. The standard decides what they mean.",
+      "spoken": "A thirty-two-bit float is just thirty-two bits. The standard decides what they mean."
+    },
+    {
+      "caption": "Split them into three fields.",
+      "spoken": "Split them into three fields."
+    },
+    {
+      "caption": "One bit for the sign, eight for the exponent, 23 for the fraction.",
+      "spoken": "One bit for the sign, eight for the exponent, twenty-three for the fraction."
+    },
+    {
+      "caption": "Together they encode scientific notation in base 2.",
+      "spoken": "Together they encode scientific notation in base two."
+    },
+    {
+      "caption": "Here are the 32 bits for one number. We decode them field by field.",
+      "spoken": "Here are the thirty-two bits for one number. We decode them field by field."
+    },
+    {
+      "caption": "Sign bit 0 means positive.",
+      "spoken": "Sign bit zero means positive."
+    },
+    {
+      "caption": "Read as a plain integer, the exponent field is 129.",
+      "spoken": "Read as a plain integer, the exponent field is one hundred twenty-nine."
+    },
+    {
+      "caption": "A bias of 127 is subtracted, so the true exponent is 2. That scales by 4.",
+      "spoken": "A bias of one hundred twenty-seven is subtracted, so the true exponent is two. That scales by four."
+    },
+    {
+      "caption": "The fraction holds the digits after the binary point. The leading 1 is implied, not stored.",
+      "spoken": "The fraction holds the digits after the binary point. The leading one is implied, not stored."
+    },
+    {
+      "caption": "Multiply it out and the pattern is 6.25.",
+      "spoken": "Multiply it out and the pattern is six point two five."
+    },
+    {
+      "caption": "Floats cannot be exact, since there are only 2³² bit patterns. Here is a toy format with 3 fraction bits.",
+      "spoken": "Floats cannot be exact, since there are only two to the thirty-second bit patterns. Here is a toy format with three fraction bits."
+    },
+    {
+      "caption": "Between 1 and 2 there are 8 evenly spaced numbers.",
+      "spoken": "Between one and two there are eight evenly spaced numbers."
+    },
+    {
+      "caption": "Between 2 and 4 there are also 8, so the spacing doubles.",
+      "spoken": "Between two and four there are also eight, so the spacing doubles."
+    },
+    {
+      "caption": "Between 4 and 8 it doubles again. Spacing grows with magnitude.",
+      "spoken": "Between four and eight it doubles again. Spacing grows with magnitude."
+    },
+    {
+      "caption": "binary32 works the same way, with 2²³ numbers per doubling.",
+      "spoken": "Binary thirty-two works the same way, with two to the twenty-third numbers per doubling."
+    },
+    {
+      "caption": "By 16,777,216 the gap is 2, so not every integer fits.",
+      "spoken": "By sixteen million seven hundred seventy-seven thousand two hundred sixteen, the gap is two, so not every integer fits."
+    },
+    {
+      "caption": "Decimal 0.1 has a repeating binary expansion, so it cannot be stored exactly.",
+      "spoken": "Decimal zero point one has a repeating binary expansion, so it cannot be stored exactly."
+    },
+    {
+      "caption": "What gets stored is the nearest double, slightly off.",
+      "spoken": "What gets stored is the nearest double, slightly off."
+    },
+    {
+      "caption": "The exact sum of the two stored values lands precisely halfway between two neighboring doubles.",
+      "spoken": "The exact sum of the two stored values lands precisely halfway between two neighboring doubles."
+    },
+    {
+      "caption": "Round-to-nearest, ties-to-even picks the upper neighbor.",
+      "spoken": "Round-to-nearest, ties-to-even picks the upper neighbor."
+    },
+    {
+      "caption": "So 0.1 + 0.2 returns 0.30000000000000004. Compare floats with a tolerance, not with ==.",
+      "spoken": "So zero point one plus zero point two returns zero point three, followed by fifteen zeros and then a four. Compare floats with a tolerance, not with double equals."
+    },
+    {
+      "caption": "Exponent values 1 to 254 give normal numbers, using the formula from scene 1.",
+      "spoken": "Exponent values one to two hundred fifty-four give normal numbers, using the formula from scene one."
+    },
+    {
+      "caption": "Exponent 0 is reserved for zero and subnormals, which fill the gap near zero.",
+      "spoken": "Exponent zero is reserved for zero and subnormals, which fill the gap near zero."
+    },
+    {
+      "caption": "Exponent 255 is reserved for infinity and NaN.",
+      "spoken": "Exponent two hundred fifty-five is reserved for infinity and nan."
+    },
+    {
+      "caption": "Two quirks follow: NaN is not equal to anything, itself included, and +0 equals −0.",
+      "spoken": "Two quirks follow: nan is not equal to anything, itself included, and plus zero equals minus zero."
+    }
+  ]
+}

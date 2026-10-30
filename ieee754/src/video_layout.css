@@ -1,0 +1,19 @@
+/* Fonts: bundled in ../fonts so the render does not need network access.
+   STIXGeneral and DejaVu Sans Mono supply symbols the Latin subsets lack (superscripts, arrows, not-equal). */
+@font-face { font-family: 'STIX Two Text'; font-weight: 400; src: url('../fonts/stix-two-text-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'STIX Two Text'; font-weight: 600; src: url('../fonts/stix-two-text-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-weight: 500; src: url('../fonts/jetbrains-mono-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'STIXGeneralLocal'; font-weight: 400; src: url('../fonts/STIXGeneral.ttf'); }
+@font-face { font-family: 'STIXGeneralLocal'; font-weight: 600; src: url('../fonts/STIXGeneralBol.ttf'); }
+@font-face { font-family: 'DejaVuMonoLocal'; font-weight: 400 500; src: url('../fonts/DejaVuSansMono.ttf'); }
+:root { --serif: 'STIX Two Text', 'STIXGeneralLocal', Georgia, serif; --mono: 'JetBrains Mono', 'DejaVuMonoLocal', monospace; }
+
+/* Video frame: 1920x1080 CSS px. The renderer's device scale factor makes 4K (x2) from the same layout. */
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+body { padding: 0; display: flex; flex-direction: column; align-items: center; }
+.rv, .rv.up { transition: none !important; }
+.vtitle { margin: 34px 0 0; font-size: 68px; font-weight: 600; letter-spacing: .01em; line-height: 1.2; }
+.vstage { width: 1400px; margin-top: 22px; border: 2px solid var(--line); border-radius: 10px; background: var(--panel); overflow: hidden; }
+#stage { display: block; width: 1400px; min-width: 0; height: auto; }
+.vcap { width: 1400px; margin: 26px 0 0; font-size: 42px; line-height: 1.35; min-height: 114px; }
+.hidden { display: none; }

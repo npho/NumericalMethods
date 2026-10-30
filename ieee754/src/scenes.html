@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IEEE 754 in Motion</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+body { margin: 0; }
+/* Layout: one dark stage in the manim/3Blue1Brown look, narration beneath it, scene tabs and transport below. Single committed dark look. */
+:root {
+  --bg: #111522;
+  --panel: #161b2b;
+  --line: #2b334a;
+  --fg: #ece9e1;
+  --muted: #8e97ad;
+  --blue: #58c4dd;
+  --green: #83c167;
+  --red: #fc6255;
+  --yellow: #ffd84a;
+  --purple: #b189c6;
+  --orange: #ff862f;
+  --serif: 'STIX Two Text', Georgia, 'Times New Roman', serif;
+  --mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--serif);
+  padding-inline: 16px;
+  padding-block: 20px 28px;
+}
+.wrap { max-width: 1040px; margin: 0 auto; display: grid; gap: 16px; }
+h1 { margin: 0; font-size: 1.7rem; font-weight: 600; letter-spacing: 0.01em; text-wrap: balance; }
+.sub { margin: 4px 0 0; color: var(--muted); font-size: 1.05rem; max-width: 62ch; }
+.stage-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+#stage { display: block; width: 100%; min-width: 720px; height: auto; }
+.cap { margin: 0; min-height: 3.6em; font-size: 1.3rem; line-height: 1.4; max-width: 64ch; }
+.bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.btn {
+  font: inherit; font-size: 1rem; color: var(--fg); background: transparent;
+  border: 1px solid var(--line); border-radius: 4px; padding: 8px 16px; cursor: pointer;
+}
+.btn:hover { border-color: var(--muted); }
+.btn:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
+.btn[aria-current="true"] { border-color: var(--yellow); color: var(--yellow); }
+.dots { display: flex; gap: 6px; margin-left: 8px; flex-wrap: wrap; }
+.dots i { display: block; width: 24px; height: 4px; border-radius: 2px; background: var(--line); }
+.dots i.done { background: var(--muted); }
+.dots i.now { background: var(--yellow); }
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+
+svg text { font-family: var(--serif); fill: var(--fg); }
+svg .mono { font-family: var(--mono); font-weight: 500; }
+svg .m { fill: var(--muted); }
+svg .b { fill: var(--blue); }
+svg .g { fill: var(--green); }
+svg .r { fill: var(--red); }
+svg .y { fill: var(--yellow); }
+svg .p { fill: var(--purple); }
+svg .o { fill: var(--orange); }
+svg .dim { opacity: 0.5; }
+.bx { fill: none; stroke: var(--line); stroke-width: 1.5; }
+.cr-r { fill: rgba(252, 98, 85, 0.18); stroke: var(--red); stroke-width: 1.5; }
+.cr-b { fill: rgba(88, 196, 221, 0.16); stroke: var(--blue); stroke-width: 1.5; }
+.cr-g { fill: rgba(131, 193, 103, 0.16); stroke: var(--green); stroke-width: 1.5; }
+.band-b { fill: rgba(88, 196, 221, 0.09); }
+.band-g { fill: rgba(131, 193, 103, 0.09); }
+.band-y { fill: rgba(255, 216, 74, 0.09); }
+.fb { fill: var(--blue); } .fg { fill: var(--green); } .fy { fill: var(--yellow); }
+.rv { opacity: 0; transition: opacity 0.7s ease, transform 0.7s ease; }
+.up { transform: translateY(10px); }
+.rv.show { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .rv { transition: none; } }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <h1>IEEE 754 in Motion</h1>
+    <p class="sub">How a computer stores real numbers, in five short scenes. Space plays or pauses, the arrow keys step.</p>
+  </header>
+  <div class="stage-scroll"><svg id="stage" viewBox="0 0 960 520" role="img" aria-label="Animated diagram of the IEEE 754 floating-point format"></svg></div>
+  <p id="cap" class="cap" aria-live="polite"></p>
+  <div class="bar">
+    <button id="back" class="btn" type="button">Back</button>
+    <button id="play" class="btn" type="button">Pause</button>
+    <button id="next" class="btn" type="button">Next</button>
+    <div id="dots" class="dots" aria-hidden="true"></div>
+  </div>
+  <nav id="tabs" class="tabs" aria-label="Scenes"></nav>
+</main>
+
+<script>
+(function () {
+  var NS_FRAC = '0'.repeat(19);
+
+  /* ---------- Scene 1: the 32 bits ---------- */
+  function scene1() {
+    var bits = '0' + '10000001' + '10010000000000000000000';
+    var x = 20, pos = [], o = '';
+    for (var i = 0; i < 32; i++) { if (i === 1 || i === 9) x += 14; pos.push(x); x += 28; }
+    var grp = function (i) { return i === 0 ? 'r' : i < 9 ? 'b' : 'g'; };
+    var cls = { r: 'r', b: 'b', g: 'g' };
+    o += '<text x="480" y="78" text-anchor="middle" font-size="36">binary32</text>';
+    o += '<text class="m" x="480" y="110" text-anchor="middle" font-size="20">single precision, 32 bits</text>';
+    for (i = 0; i < 32; i++) {
+      var g = grp(i), px = pos[i];
+      o += '<rect class="bx" x="' + px + '" y="170" width="24" height="46" rx="3"/>';
+      o += '<rect class="rv cr-' + g + '" data-from="1" x="' + px + '" y="170" width="24" height="46" rx="3"/>';
+      o += '<text class="mono rv" data-from="0" data-to="1" x="' + (px + 12) + '" y="201" text-anchor="middle" font-size="19">' + bits[i] + '</text>';
+      o += '<text class="mono rv ' + cls[g] + '" data-from="1" x="' + (px + 12) + '" y="201" text-anchor="middle" font-size="19">' + bits[i] + '</text>';
+    }
+    [[0, 31], [1, 30], [8, 23], [9, 22], [31, 0]].forEach(function (p) {
+      o += '<text class="m rv" data-from="2" x="' + (pos[p[0]] + 12) + '" y="156" text-anchor="middle" font-size="14">' + p[1] + '</text>';
+    });
+    [[0, 0, 'r', 'sign', '1 bit'], [1, 8, 'b', 'exponent', '8 bits'], [9, 31, 'g', 'fraction', '23 bits']].forEach(function (G) {
+      var x0 = pos[G[0]], x1 = pos[G[1]] + 24, cx = (x0 + x1) / 2;
+      o += '<path class="rv" data-from="2" d="M' + x0 + ' 232 v8 H' + x1 + ' v-8" fill="none" style="stroke:var(--' + { r: 'red', b: 'blue', g: 'green' }[G[2]] + ')" stroke-width="2"/>';
+      o += '<text class="rv up ' + G[2] + '" data-from="2" x="' + cx + '" y="270" text-anchor="middle" font-size="24">' + G[3] + '</text>';
+      o += '<text class="rv up m" data-from="2" x="' + cx + '" y="296" text-anchor="middle" font-size="18">' + G[4] + '</text>';
+    });
+    o += '<text class="rv up" data-from="3" x="480" y="410" text-anchor="middle" font-size="42">(−1)<tspan class="r" dy="-14" font-size="27">s</tspan><tspan dy="14"> × 1.</tspan><tspan class="g">f</tspan> × 2<tspan class="b" dy="-14" font-size="27">e − 127</tspan></text>';
+    return o;
+  }
+
+  /* ---------- Scene 2: decode 6.25 ---------- */
+  function scene2() {
+    var o = '';
+    o += '<text class="rv up r" data-from="0" x="110" y="84" text-anchor="middle" font-size="24">sign</text>';
+    o += '<text class="rv up b" data-from="0" x="400" y="84" text-anchor="middle" font-size="24">exponent</text>';
+    o += '<text class="rv up g" data-from="0" x="760" y="84" text-anchor="middle" font-size="24">fraction</text>';
+    o += '<text class="mono rv up r" data-from="0" x="110" y="136" text-anchor="middle" font-size="26">0</text>';
+    o += '<text class="mono rv up b" data-from="0" x="400" y="136" text-anchor="middle" font-size="26">10000001</text>';
+    o += '<text class="mono rv up g" data-from="0" x="760" y="136" text-anchor="middle" font-size="26">1001<tspan class="dim">' + NS_FRAC + '</tspan></text>';
+    // sign
+    o += '<text class="rv up" data-from="1" x="110" y="205" text-anchor="middle" font-size="30">(−1)<tspan class="r" dy="-13" font-size="20">0</tspan><tspan dy="13"> = +1</tspan></text>';
+    // exponent
+    o += '<text class="rv up" data-from="2" x="400" y="205" text-anchor="middle" font-size="30">10000001<tspan dy="9" font-size="17">2</tspan><tspan dy="-9"> = 129</tspan></text>';
+    o += '<text class="rv up" data-from="3" x="400" y="252" text-anchor="middle" font-size="30">129 − 127 = <tspan class="b">2</tspan></text>';
+    o += '<text class="rv up" data-from="3" x="400" y="299" text-anchor="middle" font-size="30">2<tspan class="b" dy="-13" font-size="20">2</tspan><tspan dy="13"> = </tspan><tspan class="b">4</tspan></text>';
+    // fraction
+    o += '<text class="rv up" data-from="4" x="760" y="205" text-anchor="middle" font-size="30">1.1001<tspan dy="9" font-size="17">2</tspan></text>';
+    o += '<text class="rv up" data-from="4" x="760" y="252" text-anchor="middle" font-size="30">= 1 + ½ + 1⁄16</text>';
+    o += '<text class="rv up" data-from="4" x="760" y="299" text-anchor="middle" font-size="30">= <tspan class="g">1.5625</tspan></text>';
+    // result
+    o += '<line class="rv" data-from="5" x1="80" y1="350" x2="880" y2="350" style="stroke:var(--line)" stroke-width="1.5"/>';
+    o += '<text class="rv up" data-from="5" x="480" y="425" text-anchor="middle" font-size="48"><tspan class="r">(+1)</tspan> × <tspan class="g">1.5625</tspan> × <tspan class="b">4</tspan> = <tspan class="y">6.25</tspan></text>';
+    return o;
+  }
+
+  /* ---------- Scene 3: spacing grows ---------- */
+  function scene3() {
+    var X = function (v) { return 60 + (v - 1) / 7 * 840; };
+    var o = '';
+    o += '<text class="m" x="480" y="64" text-anchor="middle" font-size="24">Toy format: 3 fraction bits, so 8 numbers per doubling</text>';
+    var bands = [[1, 2, 'b', 1, 'fb', 'blue', '2⁻³', '0.125'], [2, 4, 'g', 2, 'fg', 'green', '2⁻²', '0.25'], [4, 8, 'y', 3, 'fy', 'yellow', '2⁻¹', '0.5']];
+    bands.forEach(function (B, e) {
+      o += '<rect class="rv band-' + B[2] + '" data-from="' + B[3] + '" x="' + X(B[0]) + '" y="140" width="' + (X(B[1]) - X(B[0])) + '" height="190"/>';
+    });
+    o += '<line x1="60" y1="200" x2="900" y2="200" style="stroke:var(--muted)" stroke-width="2"/>';
+    [1, 2, 4, 8].forEach(function (v) {
+      o += '<line x1="' + X(v) + '" y1="190" x2="' + X(v) + '" y2="210" style="stroke:var(--muted)" stroke-width="2"/>';
+      o += '<text x="' + X(v) + '" y="236" text-anchor="middle" font-size="24">' + v + '</text>';
+    });
+    bands.forEach(function (B, e) {
+      var base = Math.pow(2, e);
+      for (var k = 0; k < 8; k++) {
+        var cx = X(base * (1 + k / 8));
+        o += '<circle class="rv ' + B[4] + '" data-from="' + B[3] + '" style="transition-delay:' + (k * 70) + 'ms" cx="' + cx + '" cy="200" r="5.5"/>';
+      }
+      var x1 = X(base), x2 = X(base * (1 + 1 / 8)), mid = (X(B[0]) + X(B[1])) / 2;
+      o += '<path class="rv" data-from="' + B[3] + '" d="M' + x1 + ' 214 v7 H' + x2 + ' v-7" fill="none" style="stroke:var(--' + B[5] + ')" stroke-width="2"/>';
+      o += '<text class="rv up ' + (B[2] === 'y' ? 'y' : B[2]) + '" data-from="' + B[3] + '" x="' + mid + '" y="290" text-anchor="middle" font-size="20">gap ' + B[7] + '</text>';
+      o += '<text class="rv up m" data-from="' + B[3] + '" x="' + mid + '" y="314" text-anchor="middle" font-size="18">' + B[6] + '</text>';
+    });
+    o += '<text class="rv up m" data-from="4" x="120" y="372" font-size="22">binary32, 23 fraction bits</text>';
+    var rows = [['near 1', 'gap 2⁻²³', '≈ 1.19 × 10⁻⁷'], ['near 1,024', 'gap 2⁻¹³', '≈ 1.22 × 10⁻⁴'], ['near 16,777,216', 'gap 2', '']];
+    rows.forEach(function (R, i) {
+      var y = 408 + i * 34;
+      o += '<text class="rv up" data-from="4" x="120" y="' + y + '" font-size="24">' + R[0] + '</text>';
+      o += '<text class="rv up b" data-from="4" x="360" y="' + y + '" font-size="24">' + R[1] + '</text>';
+      o += '<text class="rv up" data-from="4" x="540" y="' + y + '" font-size="24">' + R[2] + '</text>';
+    });
+    o += '<text class="rv up y" data-from="5" x="480" y="506" text-anchor="middle" font-size="22">16,777,217 sits halfway between neighbors and rounds to 16,777,216</text>';
+    return o;
+  }
+
+  /* ---------- Scene 4: 0.1 + 0.2 (binary64) ---------- */
+  function scene4() {
+    var o = '';
+    o += '<text class="m rv up" data-from="0" x="480" y="54" text-anchor="middle" font-size="22">In binary64 (double precision)</text>';
+    o += '<text class="mono rv up" data-from="0" x="480" y="104" text-anchor="middle" font-size="26">0.1 = 0.0<tspan class="y"> 0011 0011 0011 0011</tspan> …<tspan class="m" font-size="18" dy="4"> base 2</tspan></text>';
+    o += '<text class="m rv up" data-from="1" x="480" y="160" text-anchor="middle" font-size="22">stored as the nearest double</text>';
+    o += '<text class="mono rv up" data-from="1" x="480" y="202" text-anchor="middle" font-size="24"><tspan class="b">0.1</tspan> → 0.1000000000000000055511…</text>';
+    o += '<text class="mono rv up" data-from="1" x="480" y="238" text-anchor="middle" font-size="24"><tspan class="g">0.2</tspan> → 0.2000000000000000111022…</text>';
+    o += '<text class="rv up" data-from="2" x="480" y="292" text-anchor="middle" font-size="24">exact sum of the two stored values: <tspan class="p mono" font-size="21">0.30000000000000001665…</tspan></text>';
+    o += '<text class="rv up y" data-from="3" x="480" y="326" text-anchor="middle" font-size="24">exactly halfway, so ties round to even, which is the upper neighbor</text>';
+    // number line
+    o += '<g class="rv" data-from="2">';
+    o += '<line x1="120" y1="392" x2="840" y2="392" style="stroke:var(--muted)" stroke-width="2"/>';
+    o += '<path d="M240 376 v-8 H720 v8" fill="none" style="stroke:var(--muted)" stroke-width="1.5"/>';
+    o += '<text class="m" x="480" y="356" text-anchor="middle" font-size="19">neighbors are 2⁻⁵⁴ ≈ 5.55 × 10⁻¹⁷ apart</text>';
+    o += '</g>';
+    var T = [[240, 'g', 'fg', 'nearest double to 0.3', '0.29999999999999998890'], [480, 'p', 'fp', 'exact sum', '0.30000000000000001665'], [720, 'y', 'fy', 'what 0.1 + 0.2 returns', '0.30000000000000004441']];
+    T.forEach(function (t) {
+      o += '<line class="rv" data-from="2" x1="' + t[0] + '" y1="380" x2="' + t[0] + '" y2="404" style="stroke:var(--' + { g: 'green', p: 'purple', y: 'yellow' }[t[1]] + ')" stroke-width="3"/>';
+      o += '<text class="rv up m" data-from="2" x="' + t[0] + '" y="430" text-anchor="middle" font-size="19">' + t[3] + '</text>';
+      o += '<text class="mono rv up ' + t[1] + '" data-from="2" x="' + t[0] + '" y="454" text-anchor="middle" font-size="15">' + t[4] + '</text>';
+    });
+    o += '<circle class="rv" data-from="3" cx="720" cy="392" r="12" fill="none" style="stroke:var(--yellow)" stroke-width="2.5"/>';
+    o += '<text class="mono rv up" data-from="4" x="480" y="500" text-anchor="middle" font-size="24">0.1 + 0.2 → <tspan class="y">0.30000000000000004</tspan> ≠ 0.3</text>';
+    return o;
+  }
+
+  /* ---------- Scene 5: special exponents ---------- */
+  function scene5() {
+    var o = '';
+    o += '<text class="m" x="480" y="64" text-anchor="middle" font-size="24">The 8 exponent bits, 0 to 255 (not drawn to scale)</text>';
+    o += '<rect x="60" y="130" width="150" height="70" style="fill:rgba(177,137,198,0.22);stroke:var(--purple)" stroke-width="1.5"/>';
+    o += '<rect x="210" y="130" width="540" height="70" style="fill:rgba(88,196,221,0.16);stroke:var(--blue)" stroke-width="1.5"/>';
+    o += '<rect x="750" y="130" width="150" height="70" style="fill:rgba(255,134,47,0.2);stroke:var(--orange)" stroke-width="1.5"/>';
+    o += '<text class="mono" x="135" y="172" text-anchor="middle" font-size="20">e = 0</text>';
+    o += '<text class="mono" x="480" y="172" text-anchor="middle" font-size="20">e = 1 … 254</text>';
+    o += '<text class="mono" x="825" y="172" text-anchor="middle" font-size="20">e = 255</text>';
+    o += '<text class="mono m" x="135" y="224" text-anchor="middle" font-size="14">00000000</text>';
+    o += '<text class="mono m" x="480" y="224" text-anchor="middle" font-size="14">00000001 … 11111110</text>';
+    o += '<text class="mono m" x="825" y="224" text-anchor="middle" font-size="14">11111111</text>';
+    o += '<text class="b rv up" data-from="0" x="480" y="282" text-anchor="middle" font-size="26">normal numbers</text>';
+    o += '<text class="rv up" data-from="0" x="480" y="322" text-anchor="middle" font-size="28">1.f × 2<tspan dy="-12" font-size="19">e − 127</tspan></text>';
+    o += '<text class="m rv up" data-from="0" x="480" y="372" text-anchor="middle" font-size="20">about 1.18 × 10⁻³⁸ up to 3.40 × 10³⁸</text>';
+    o += '<g class="rv up" data-from="1">';
+    o += '<text class="p" x="135" y="282" text-anchor="middle" font-size="24">fraction = 0</text>';
+    o += '<text x="135" y="314" text-anchor="middle" font-size="26">±0</text>';
+    o += '<text class="p" x="135" y="364" text-anchor="middle" font-size="24">fraction ≠ 0</text>';
+    o += '<text x="135" y="396" text-anchor="middle" font-size="22">subnormal</text>';
+    o += '<text x="135" y="426" text-anchor="middle" font-size="22">0.f × 2<tspan dy="-10" font-size="16">−126</tspan></text>';
+    o += '</g>';
+    o += '<g class="rv up" data-from="2">';
+    o += '<text class="o" x="825" y="282" text-anchor="middle" font-size="24">fraction = 0</text>';
+    o += '<text x="825" y="314" text-anchor="middle" font-size="26">±∞</text>';
+    o += '<text class="o" x="825" y="364" text-anchor="middle" font-size="24">fraction ≠ 0</text>';
+    o += '<text x="825" y="396" text-anchor="middle" font-size="26">NaN</text>';
+    o += '</g>';
+    o += '<text class="rv up y" data-from="3" x="480" y="486" text-anchor="middle" font-size="26">NaN ≠ NaN, even to itself   ·   +0 == −0</text>';
+    return o;
+  }
+
+  var scenes = [
+    { tab: 'The 32 bits', svg: scene1, caps: [
+      'A 32-bit float is just 32 bits. The standard decides what they mean.',
+      'Split them into three fields.',
+      'One bit for the sign, eight for the exponent, 23 for the fraction.',
+      'Together they encode scientific notation in base 2.'] },
+    { tab: 'Decoding 6.25', svg: scene2, caps: [
+      'Here are the 32 bits for one number. We decode them field by field.',
+      'Sign bit 0 means positive.',
+      'Read as a plain integer, the exponent field is 129.',
+      'A bias of 127 is subtracted, so the true exponent is 2. That scales by 4.',
+      'The fraction holds the digits after the binary point. The leading 1 is implied, not stored.',
+      'Multiply it out and the pattern is 6.25.'] },
+    { tab: 'Gaps grow', svg: scene3, caps: [
+      'Floats cannot be exact, since there are only 2³² bit patterns. Here is a toy format with 3 fraction bits.',
+      'Between 1 and 2 there are 8 evenly spaced numbers.',
+      'Between 2 and 4 there are also 8, so the spacing doubles.',
+      'Between 4 and 8 it doubles again. Spacing grows with magnitude.',
+      'binary32 works the same way, with 2²³ numbers per doubling.',
+      'By 16,777,216 the gap is 2, so not every integer fits.'] },
+    { tab: '0.1 + 0.2', svg: scene4, caps: [
+      'Decimal 0.1 has a repeating binary expansion, so it cannot be stored exactly.',
+      'What gets stored is the nearest double, slightly off.',
+      'The exact sum of the two stored values lands precisely halfway between two neighboring doubles.',
+      'Round-to-nearest, ties-to-even picks the upper neighbor.',
+      'So 0.1 + 0.2 returns 0.30000000000000004. Compare floats with a tolerance, not with ==.'] },
+    { tab: 'Special values', svg: scene5, caps: [
+      'Exponent values 1 to 254 give normal numbers, using the formula from scene 1.',
+      'Exponent 0 is reserved for zero and subnormals, which fill the gap near zero.',
+      'Exponent 255 is reserved for infinity and NaN.',
+      'Two quirks follow: NaN is not equal to anything, itself included, and +0 equals −0.'] }
+  ];
+
+  var stage = document.getElementById('stage');
+  var capEl = document.getElementById('cap');
+  var playBtn = document.getElementById('play');
+  var dotsEl = document.getElementById('dots');
+  var tabsEl = document.getElementById('tabs');
+  var reduced = false;
+  try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  var si = 0, st = 0, playing = !reduced, timer = null, DELAY = 3800;
+
+  var tabBtns = scenes.map(function (s, i) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'btn'; b.textContent = (i + 1) + '  ' + s.tab;
+    b.addEventListener('click', function () { mount(i, 0); restart(); });
+    tabsEl.appendChild(b);
+    return b;
+  });
+
+  function apply() {
+    var els = stage.querySelectorAll('[data-from]');
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      var from = +el.getAttribute('data-from');
+      var toAttr = el.getAttribute('data-to');
+      var to = toAttr === null ? Infinity : +toAttr;
+      el.classList.toggle('show', st >= from && st < to);
+    }
+    capEl.textContent = scenes[si].caps[st];
+    var n = scenes[si].caps.length;
+    dotsEl.innerHTML = '';
+    for (var k = 0; k < n; k++) {
+      var d = document.createElement('i');
+      d.className = k < st ? 'done' : k === st ? 'now' : '';
+      dotsEl.appendChild(d);
+    }
+    tabBtns.forEach(function (b, i) { if (i === si) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); });
+    playBtn.textContent = playing ? 'Pause' : (si === scenes.length - 1 && st === n - 1 ? 'Replay' : 'Play');
+  }
+
+  function mount(i, s) {
+    si = i; st = s;
+    stage.innerHTML = scenes[i].svg();
+    capEl.textContent = scenes[i].caps[s];
+    requestAnimationFrame(function () { requestAnimationFrame(apply); });
+    apply0();
+  }
+  function apply0() {
+    // update chrome right away; element reveal follows on the next frames so it can transition
+    var n = scenes[si].caps.length;
+    dotsEl.innerHTML = '';
+    for (var k = 0; k < n; k++) {
+      var d = document.createElement('i');
+      d.className = k < st ? 'done' : k === st ? 'now' : '';
+      dotsEl.appendChild(d);
+    }
+    tabBtns.forEach(function (b, i) { if (i === si) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); });
+  }
+
+  function atEnd() { return si === scenes.length - 1 && st === scenes[si].caps.length - 1; }
+  function next() {
+    if (st < scenes[si].caps.length - 1) { st++; apply(); }
+    else if (si < scenes.length - 1) { mount(si + 1, 0); }
+    else { playing = false; apply(); }
+  }
+  function back() {
+    if (st > 0) { st--; apply(); }
+    else if (si > 0) { mount(si - 1, scenes[si - 1].caps.length - 1); }
+  }
+  function restart() {
+    clearTimeout(timer);
+    if (playing) timer = setTimeout(tick, DELAY);
+  }
+  function tick() {
+    next();
+    if (playing && !atEnd()) timer = setTimeout(tick, DELAY);
+    else if (atEnd()) { playing = false; apply(); }
+  }
+  function togglePlay() {
+    if (playing) { playing = false; clearTimeout(timer); apply(); return; }
+    if (atEnd()) mount(0, 0);
+    playing = true; apply(); restart();
+  }
+
+  document.getElementById('next').addEventListener('click', function () { next(); restart(); });
+  document.getElementById('back').addEventListener('click', function () { back(); restart(); });
+  playBtn.addEventListener('click', togglePlay);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight') { next(); restart(); e.preventDefault(); }
+    else if (e.key === 'ArrowLeft') { back(); restart(); e.preventDefault(); }
+    else if (e.key === ' ' && e.target.tagName !== 'BUTTON') { togglePlay(); e.preventDefault(); }
+  });
+
+  if (window.__VIDEO__) {
+    // Render hooks used by make_video.py (no autoplay, no timers).
+    window.__show = function (i, s) { si = i; st = s; stage.innerHTML = scenes[i].svg(); apply(); };
+    window.__scenes = scenes.map(function (s) { return s.caps.length; });
+  } else {
+    mount(0, 0);
+    restart();
+  }
+})();
+</script>
+</body>
+</html>
