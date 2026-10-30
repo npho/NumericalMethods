@@ -1,0 +1,112 @@
+{
+  "voice": "af_heart",
+  "speed": 0.97,
+  "lang": "en-us",
+  "defaults": {"lead": 0.8, "gap": 0.55, "tail": 2.5},
+  "scenes": [
+    {
+      "name": "title", "lead": 1.0, "tail": 2.0,
+      "lines": [
+        {"key": "hook", "text": "Oiler's method follows the slope at the start of each step, and pays for it. What if we looked at the slope in more than one place?"},
+        {"key": "name", "text": "That idea leads to the most widely taught method for differential equations: Runga Kutta, and in particular its classic fourth order version, R K four."}
+      ]
+    },
+    {
+      "name": "the problem",
+      "lines": [
+        {"key": "setup", "text": "We'll keep the same test problem as before: y prime equals y, starting from one. Let's take a single step of size one."},
+        {"key": "euler", "text": "Oiler uses the slope at the start, which is one, and lands at two. The true value is e, {w_e}. That slope was too small for the whole step, because the curve steepens as it goes."},
+        {"key": "idea", "text": "So the step should use a slope that represents the whole interval, not just its first instant. The question is how to get one without already knowing the answer."}
+      ]
+    },
+    {
+      "name": "midpoint",
+      "lines": [
+        {"key": "half", "text": "The midpoint method makes a first guess. Take a half step using the starting slope, and measure the slope there."},
+        {"key": "full", "text": "Then go back to the start, and take the whole step using that middle slope. On this problem it lands at {w_mid_one}, much closer than Oiler's two."},
+        {"key": "gap", "text": "But the middle slope was measured at a point we reached with the crude starting slope. We can do better, by measuring again."}
+      ]
+    },
+    {
+      "name": "four slopes",
+      "lines": [
+        {"key": "k1", "text": "Runga Kutta measures four slopes. The first, k one, is the slope at the start."},
+        {"key": "k2", "text": "The second, k two, is the slope at the middle, reached using k one."},
+        {"key": "k3", "text": "The third, k three, is the slope at the middle again, but reached using k two, which is a better estimate of where we are."},
+        {"key": "k4", "text": "The fourth, k four, is the slope at the end, reached using k three."},
+        {"key": "avg", "text": "Then we average them, giving the two middle slopes double weight: one, two, two, one, divided by six. The step uses that average."}
+      ]
+    },
+    {
+      "name": "worked example",
+      "lines": [
+        {"key": "setup", "text": "Here are the numbers for y prime equals y, with h equal to one. The first slope, k one, is one."},
+        {"key": "ks", "text": "k two is one and a half. k three is one point seven five. k four is two point seven five."},
+        {"key": "avg", "text": "The weighted average is {w_k_avg}, and the single step lands at {w_rk4_one}."},
+        {"key": "compare", "text": "The truth is {w_e}. We've missed by only {w_rk4_one_err}, from one step of size one. The midpoint method missed by {w_mid_one_err}, and Oiler by seven tenths."}
+      ]
+    },
+    {
+      "name": "simpson",
+      "lines": [
+        {"key": "setup", "text": "Where do the weights come from? Suppose the slope depends only on time, so we're really just computing an integral."},
+        {"key": "simpson", "text": "Then k two and k three are the same number, and the formula becomes one, four, one, over six. That's Simpson's rule, the one from numerical integration."},
+        {"key": "meaning", "text": "So Runga Kutta is Simpson's rule, extended to equations where the slope also depends on the answer itself."}
+      ]
+    },
+    {
+      "name": "several steps",
+      "lines": [
+        {"key": "setup", "text": "Now several steps. Take h equal to one half, up to time two, as in the Oiler video."},
+        {"key": "table", "text": "Each step multiplies the height by about one point six four eight. After four steps, we have {w_tab_y4}."},
+        {"key": "compare", "text": "The exact answer is {w_tab_exact}, so we're off by {w_tab_err}. Oiler, with the same step, was short by {w_tab_euler_pct} percent."}
+      ]
+    },
+    {
+      "name": "order",
+      "lines": [
+        {"key": "setup", "text": "How does the error shrink? On logarithmic axes, Oiler's error falls with slope one, and the midpoint method with slope two."},
+        {"key": "rk4", "text": "Runga Kutta falls with slope four. Cut the step in half, and the error drops by a factor of sixteen. That holds for the nonlinear logistic equation too."},
+        {"key": "why", "text": "The reason: the four slopes are combined so that the answer matches the Taylor series of the true solution, all the way through the h to the fourth term. What's left over is of order h to the fifth in one step, and h to the fourth across a whole interval."},
+        {"key": "caveat", "text": "But this assumes the solution is smooth. Try y prime equals the square root of t, which has a kink at zero. The error slope drops to {w_sl_sqrt}, for R K four and the midpoint method alike. High order only pays off when the problem is smooth."}
+      ]
+    },
+    {
+      "name": "cost",
+      "lines": [
+        {"key": "setup", "text": "Each R K four step costs four evaluations of the slope, so let's compare fairly, with the same budget of one hundred evaluations."},
+        {"key": "budget", "text": "Oiler gets one hundred steps, and an error of {w_bud_err_euler}. The midpoint method gets fifty steps, and {w_bud_err_mid}. R K four gets {w_bud_n_rk4} steps, and {w_bud_err_rk4}."},
+        {"key": "target", "text": "Turn it around: to get the error below ten to the minus ten, Oiler needs about {w_ev_euler} evaluations, the midpoint method about {w_ev_midpoint}, and R K four, {w_ev_rk4}."},
+        {"key": "note", "text": "That's one smooth problem, and it counts slope evaluations, not seconds. But the gap is far too large to be an accident of the setup."}
+      ]
+    },
+    {
+      "name": "stability",
+      "lines": [
+        {"key": "setup", "text": "Cost per step isn't the whole story. On y prime equals minus lambda y, every method has a largest stable step."},
+        {"key": "limits", "text": "Oiler and the midpoint method both need lambda h below two. R K four allows up to {w_lim_rk4}."},
+        {"key": "per", "text": "But that costs four evaluations. Per evaluation, R K four's stable step is only about {w_lim_rk4_ev}, compared with two for Oiler. So when a problem has very fast decaying parts, stability still limits the step, which is why implicit methods exist."}
+      ]
+    },
+    {
+      "name": "spring",
+      "lines": [
+        {"key": "setup", "text": "One more test: the spring from the leapfrog video, now with a step of one half, for two hundred periods."},
+        {"key": "rk4", "text": "R K four doesn't explode like Oiler. But its energy slowly bleeds away, losing about {w_spr_pct} percent over the run."},
+        {"key": "lf", "text": "Leapfrog's energy wobbles, but never drifts. Different tools, for different jobs."},
+        {"key": "step", "text": "With a smaller step, R K four loses far less. Which method is right depends on what you need to conserve."}
+      ]
+    },
+    {
+      "name": "summary",
+      "tail": 3.0,
+      "lines": [
+        {"key": "row1", "text": "To sum up. R K four takes four slopes per step, and combines them with weights one, two, two, one, over six."},
+        {"key": "row2", "text": "It's fourth order on smooth problems, and contains Simpson's rule as a special case."},
+        {"key": "row3", "text": "At equal cost it beats Oiler and the midpoint method by a wide margin on smooth problems. It loses that edge on kinks, and its stability limit is only a little above Oiler's."},
+        {"key": "row4", "text": "Practical solvers go further. Adaptive methods such as R K forty five, the default in Sigh Pie's solve I V P, compare a fourth and a fifth order answer to estimate the error and choose the step."},
+        {"key": "close", "text": "Oiler follows one slope. Runga Kutta asks four questions of the equation, and averages the answers. That's the whole trick."}
+      ]
+    }
+  ]
+}
