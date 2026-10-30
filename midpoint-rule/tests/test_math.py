@@ -1,11 +1,14 @@
 """Numerical checks of every mathematical claim made in the video.
 Run with:  python build.py test   (or: pytest -q tests)
 """
+import os
 import numpy as np
 import pytest
 
 from midpoint_video.mathcore import (f, f1, f2, EXACT, Lsum, Rsum, Msum, Tsum, Ssum, NS, ERR, slope,
                                       STRIP_ERR, STRIPS, FACTS, M_endpoint_singularity)
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def test_exact_value():
@@ -75,7 +78,7 @@ def test_endpoint_singularity_converges_slowly():
 
 def test_narration_script_is_consistent():
     from midpoint_video.narration import load_script
-    s = load_script("narration.json")                      # raises KeyError if a {placeholder} has no fact
+    s = load_script(os.path.join(ROOT, "narration.json"))                      # raises KeyError if a {placeholder} has no fact
     lines = [ln["spoken"] for sc in s["scenes"] for ln in sc["lines"]]
     assert len(lines) >= 40
     assert not any("minus minus" in t or "minus -" in t for t in lines)
