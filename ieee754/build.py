@@ -9,7 +9,7 @@ Pipeline
   models     download the Kokoro text-to-speech model once (about 350 MB) into ../models
   narration  speak each line of narration.json, trim, limit and match loudness -> build/narration/cNN.wav
   render     screenshot every slide and the title-intro frames from src/scenes.html with headless Chromium
-  video      lay everything on a timeline, crossfade slides, mix audio, encode H.264 + AAC -> output/*.mp4
+  video      lay everything on a timeline, crossfade slides, mix audio, encode H.264 + AAC -> build/ieee754_<res>.mp4
   verify     decode the finished file and check sync, loudness, holds, resolution
 
 Timeline (seconds)
@@ -33,11 +33,12 @@ from html import escape
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-SRC, BUILD, MODELS, OUTPUT = ROOT / 'src', ROOT / 'build', ROOT.parent / 'models', ROOT / 'output'
+SRC, BUILD, MODELS = ROOT / 'src', ROOT / 'build', ROOT.parent / 'models'
 NARR = BUILD / 'narration'
 MODEL_URL = 'https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/'
 MODEL_FILES = {'kokoro-v1.0.onnx': 300_000_000, 'voices-v1.0.bin': 20_000_000}  # name -> minimum plausible size (bytes)
 VIEW_W, VIEW_H = 1920, 1080  # CSS pixels; --scale multiplies the real pixel count
+RES_NAME = {1: '1080p', 2: '4k'}  # --scale -> label used in the output filename, as in the other videos
 
 
 # --------------------------------------------------------------------------- helpers
@@ -330,7 +331,7 @@ def step_video(a) -> None:
     T = make_timeline(nar['durations'], a)
     n, fps, fade = T['n'], a.fps, a.fade
     W, H = VIEW_W * a.scale, VIEW_H * a.scale
-    out = Path(a.out) if a.out else OUTPUT / f'ieee754_in_motion_{W}x{H}.mp4'
+    out = Path(a.out) if a.out else BUILD / f'ieee754_{RES_NAME[a.scale]}.mp4'
     out.parent.mkdir(parents=True, exist_ok=True)
     T['output'] = str(out)
     (BUILD / 'timeline.json').write_text(json.dumps(T, indent=1))
@@ -464,7 +465,7 @@ def main() -> None:
     ap.add_argument('step', nargs='?', default='all', choices=['all'] + steps, help='which step to run (default: all)')
     ap.add_argument('--scale', type=int, choices=[1, 2], default=1, help='1 = 1920x1080, 2 = 3840x2160 (default 1)')
     ap.add_argument('--fps', type=int, default=30)
-    ap.add_argument('--out', help='output .mp4 path (default output/ieee754_in_motion_<W>x<H>.mp4)')
+    ap.add_argument('--out', help='output .mp4 path (default build/ieee754_<res>.mp4, res = 1080p or 4k)')
     g = ap.add_argument_group('narration')
     g.add_argument('--voice', default='af_heart', help='Kokoro voice id (default af_heart)')
     g.add_argument('--speed', type=float, default=1.0, help='speaking speed multiplier (default 1.0)')

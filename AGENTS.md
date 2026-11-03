@@ -12,7 +12,7 @@ Python code with each other.
 | `leapfrog/` | `leapfrog_video/` | `build/leapfrog_<res>.mp4` |
 | `euler/` | `euler_video/` | `build/euler_<res>.mp4` |
 | `rk4/` | `rk4_video/` | `build/rk4_<res>.mp4` |
-| `ieee754/` | none (`build.py` + `src/`) | `output/ieee754_in_motion_<W>x<H>.mp4` |
+| `ieee754/` | none (`build.py` + `src/`) | `build/ieee754_<res>.mp4` (`1080p` or `4k`) |
 
 ## Shared at the root
 - `pyproject.toml`, `uv.lock`, `.python-version` (3.13): one environment, the superset of every video's
@@ -61,7 +61,7 @@ Python code with each other.
 ## Platform
 - Development target is macOS (arm64) and Linux. System requirement is only `ffmpeg` with libx264.
 - Do not add apt-only or Linux-path assumptions. Put bundled assets in the shared root folders.
-- Large generated files (`models/`, `build/`, `output/`, `*.mp4`, `*.wav`) are never committed.
+- Large generated files (`models/`, `build/`, `*.mp4`, `*.wav`) are never committed.
 
 ## Verification
 - After code changes, run the tests and render a still:

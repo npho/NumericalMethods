@@ -18,7 +18,7 @@ brew install ffmpeg              # Debian/Ubuntu: sudo apt install ffmpeg
 uv sync                          # once, at the repo root or here (one shared environment)
 uv run playwright install chromium
 uv run build.py                  # models -> narration -> render -> video -> verify, 1080p
-uv run build.py --scale 2        # same at 4K -> output/ieee754_in_motion_3840x2160.mp4
+uv run build.py --scale 2        # same at 4K -> build/ieee754_4k.mp4
 ```
 Run one step with `uv run build.py <step>`. After editing narration only, run `narration` then `video`;
 after editing slides, run `render` then `video`. Behind a TLS-intercepting proxy, set `SSL_CERT_FILE`.
@@ -28,7 +28,7 @@ after editing slides, run `render` then `video`. Behind a TLS-intercepting proxy
 | `models` | downloads the Kokoro model and voices once (~350 MB) | `../models/` |
 | `narration` | checks captions, speaks each line, trims, limits, normalises loudness; caches unchanged lines | `build/narration/` |
 | `render` | screenshots every slide and the title-intro frames; `--scale 2` redraws at 3840×2160 | `build/frames_WxH/` |
-| `video` | builds the timeline, crossfades, mixes audio, encodes H.264 + AAC | `output/*.mp4` |
+| `video` | builds the timeline, crossfades, mixes audio, encodes H.264 + AAC | `build/ieee754_<res>.mp4` |
 | `verify` | checks resolution, duration, silence in fades, speech timing, loudness, slide stillness | PASS/FAIL, exit 1 on failure |
 
 Options: `--min-hold 3.0`, `--fade 0.6`, `--lead 0.4`, `--lead-first 0.6`, `--tail 0.6`,
@@ -55,7 +55,7 @@ The 32 bits (sign, exponent, fraction) · decoding 6.25 field by field · gaps g
 ```
 build.py  narration.json
 src/scenes.html  src/video_layout.css
-build/ output/        generated (git-ignored)
+build/                generated (git-ignored): frames, audio, final mp4
 ../fonts/ ../models/  shared with the other videos (STIX Two Text, JetBrains Mono, STIXGeneral, DejaVu Sans Mono)
 ```
 
