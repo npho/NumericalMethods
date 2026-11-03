@@ -7,7 +7,7 @@
 
 Individual stages: tts, timeline, audio, render, mux, test.
 """
-import argparse, json, os, sys
+import argparse, json, os, subprocess, sys
 
 from euler_video import narration as N
 
@@ -40,7 +40,7 @@ def main():
     if a.cmd == "setup":
         N.setup_models(MODELS); return
     if a.cmd == "test":
-        sys.exit(os.system(f"{sys.executable} -m pytest -q tests"))
+        sys.exit(subprocess.run([sys.executable, "-m", "pytest", "-q", "tests"]).returncode)
     if a.cmd in ("tts", "all"):
         N.synth_all(script, "build", MODELS, a.voice, a.speed, a.force_tts)
     if a.cmd == "tts": return
